@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>862</width>
-    <height>482</height>
+    <width>666</width>
+    <height>570</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -93,6 +93,12 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
        </property>
        <property name="rootIsDecorated">
         <bool>true</bool>

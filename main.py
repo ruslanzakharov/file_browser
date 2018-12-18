@@ -3,7 +3,7 @@ import os
 import subprocess
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileSystemModel, QMenu
-from PyQt5.QtWidgets import QMenu
+from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QDir, Qt
 from PyQt5.QtGui import QCursor
 
@@ -16,7 +16,7 @@ class Browser(QMainWindow):
 
     def initUI(self):
         self.search_field.setText(QDir.rootPath())
-        # Список использованных путей
+        # История путей
         self.paths = [QDir.rootPath()]
         # path_ind для left, right клавиш
         self.path_ind = 0
@@ -27,6 +27,8 @@ class Browser(QMainWindow):
 
         self.btn_left.clicked.connect(self.btn_left_act)
         self.btn_right.clicked.connect(self.btn_right_act)
+
+        self.btn_search.clicked.connect(self.btn_search_act)
 
     def folder_tree(self):
         """Отобразить структуру папок системы."""
@@ -39,6 +41,8 @@ class Browser(QMainWindow):
         self.dir_view.hideColumn(2)
         self.dir_view.hideColumn(3)
         self.dir_view.setRootIndex(self.dir_model.index(QDir.rootPath()))
+        # Фактор растягивания folder_tree
+        self.splitter.setStretchFactor(0, 0)
 
         self.dir_view.clicked.connect(self.switch_folder)
 
@@ -51,6 +55,8 @@ class Browser(QMainWindow):
         self.table_view.setRootIndex(self.table_model.index(QDir.rootPath()))
         self.table_view.setSortingEnabled(True)
         self.table_view.setRootIsDecorated(False)
+        # Фактор растягивания folder_content
+        self.splitter.setStretchFactor(1, 1)
 
         self.table_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self.table_view.customContextMenuRequested.connect(self.context_menu)
@@ -58,9 +64,10 @@ class Browser(QMainWindow):
     def switch_folder(self, index):
         """Сменить отображаемую папку с содержимым."""
         path = self.dir_model.fileInfo(index).absoluteFilePath()
-        self.table_view.setRootIndex(self.table_model.setRootPath(path))
 
-        self.change_field_text(path)
+        if self.access_folder(path):
+            self.table_view.setRootIndex(self.table_model.setRootPath(path))
+            self.change_field_text(path)
 
     def context_menu(self):
         """Открыть меню правой кнопкой мыши."""
@@ -68,24 +75,29 @@ class Browser(QMainWindow):
         btn_open = menu.addAction('Оpen')
 
         cursor = QCursor()
-        btn_open.triggered.connect(self.open_file)
-        menu.exec_(cursor.pos())
+        btn_open.triggered.connect(self.open_item)
+        menu.exec(cursor.pos())
 
-    def open_file(self):
+    def open_item(self, path):
         """Открыть файл."""
-        path = self.table_model.fileInfo(self.table_view.currentIndex())\
-            .absoluteFilePath()
+        if type(path) != str:
+            path = self.table_model.fileInfo(self.table_view.currentIndex())\
+                .absoluteFilePath()
 
-        if os.path.isfile(path):
+        if not os.path.exists(path):
+            self.popup_widget('Данного пункта не существует')
+        elif os.path.isfile(path):
             if os.name == 'nt':  # Для Windows
                 os.startfile(path)
             elif os.name == 'posix':  # Для Linux, Mac
-                subprocess.call(('xdg-open', path))
+                if subprocess.call(('xdg-open', path)) != 0:
+                    self.popup_widget('Файл недоступен')
         elif os.path.isdir(path):
-            # Открыть папку
-            self.table_view.setRootIndex(self.table_model.setRootPath(path))
+            if self.access_folder(path):
+                # Открыть папку
+                self.table_view.setRootIndex(self.table_model.setRootPath(path))
 
-            self.change_field_text(path)
+                self.change_field_text(path)
 
     def btn_left_act(self):
         """Сменить путь в случае нажатия на левую кнопку"""
@@ -108,12 +120,34 @@ class Browser(QMainWindow):
                 self.table_model.setRootPath(new_path))
 
     def change_field_text(self, path):
-        """Сменить путь в поисковой строке и перейти туда."""
+        """Сменить путь в поисковой строке."""
         self.paths.append(path)
         self.path_ind = len(self.paths) - 1
         self.ind_hist.append(self.path_ind)
 
         self.search_field.setText(path)
+
+    def btn_search_act(self):
+        path = self.search_field.text()
+        self.open_item(path)
+
+    def popup_widget(self, text):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Warning)
+        msg.setText(text)
+        msg.setWindowTitle('Warning')
+        msg.exec()
+
+    def access_folder(self, path):
+        try:
+            with open(path + '/f') as f:
+                pass
+        except PermissionError:
+            self.popup_widget('Папка недоступна')
+            return False
+        except BaseException:
+            pass
+        return True
 
 
 if __name__ == '__main__':
