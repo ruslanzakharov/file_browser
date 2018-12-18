@@ -34,7 +34,7 @@
      </widget>
     </item>
     <item row="0" column="3">
-     <widget class="QPushButton" name="btn_searsh">
+     <widget class="QPushButton" name="btn_search">
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -94,8 +94,18 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="rootIsDecorated">
+        <bool>true</bool>
+       </property>
       </widget>
-      <widget class="QTreeView" name="table_view"/>
+      <widget class="QTreeView" name="table_view">
+       <property name="rootIsDecorated">
+        <bool>true</bool>
+       </property>
+       <property name="expandsOnDoubleClick">
+        <bool>false</bool>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
