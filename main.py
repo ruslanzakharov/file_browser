@@ -15,12 +15,18 @@ class Browser(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        self.paths = []
+        self.search_field.setText(QDir.rootPath())
+        # Список использованных путей
+        self.paths = [QDir.rootPath()]
+        # path_ind для left, right клавиш
+        self.path_ind = 0
+        self.ind_hist = [0]
 
         self.folder_tree()
         self.folder_content()
 
         self.btn_left.clicked.connect(self.btn_left_act)
+        self.btn_right.clicked.connect(self.btn_right_act)
 
     def folder_tree(self):
         """Отобразить структуру папок системы."""
@@ -53,8 +59,8 @@ class Browser(QMainWindow):
         """Сменить отображаемую папку с содержимым."""
         path = self.dir_model.fileInfo(index).absoluteFilePath()
         self.table_view.setRootIndex(self.table_model.setRootPath(path))
-        self.search_field.setText(path)
-        self.paths.append()
+
+        self.change_field_text(path)
 
     def context_menu(self):
         """Открыть меню правой кнопкой мыши."""
@@ -76,12 +82,38 @@ class Browser(QMainWindow):
             elif os.name == 'posix':  # Для Linux, Mac
                 subprocess.call(('xdg-open', path))
         elif os.path.isdir(path):
+            # Открыть папку
             self.table_view.setRootIndex(self.table_model.setRootPath(path))
-            self.paths.append(path)
-            self.search_field.setText(path)
+
+            self.change_field_text(path)
 
     def btn_left_act(self):
-        pass
+        """Сменить путь в случае нажатия на левую кнопку"""
+        if self.path_ind > 0:
+            self.path_ind -= 1
+            new_path = self.paths[self.path_ind]
+            self.search_field.setText(new_path)
+
+            self.table_view.setRootIndex(
+                self.table_model.setRootPath(new_path))
+
+    def btn_right_act(self):
+        """Сменить путь в случае нажатия на правую кнопку"""
+        if self.path_ind < len(self.paths) - 1:
+            self.path_ind += 1
+            new_path = self.paths[self.path_ind]
+            self.search_field.setText(new_path)
+
+            self.table_view.setRootIndex(
+                self.table_model.setRootPath(new_path))
+
+    def change_field_text(self, path):
+        """Сменить путь в поисковой строке и перейти туда."""
+        self.paths.append(path)
+        self.path_ind = len(self.paths) - 1
+        self.ind_hist.append(self.path_ind)
+
+        self.search_field.setText(path)
 
 
 if __name__ == '__main__':
