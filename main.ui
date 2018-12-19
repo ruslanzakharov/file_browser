@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>666</width>
-    <height>570</height>
+    <width>735</width>
+    <height>511</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -100,11 +100,17 @@
          <height>0</height>
         </size>
        </property>
+       <property name="locale">
+        <locale language="Russian" country="Russia"/>
+       </property>
        <property name="rootIsDecorated">
         <bool>true</bool>
        </property>
       </widget>
       <widget class="QTreeView" name="table_view">
+       <property name="locale">
+        <locale language="Russian" country="Russia"/>
+       </property>
        <property name="rootIsDecorated">
         <bool>true</bool>
        </property>
@@ -116,7 +122,6 @@
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>
