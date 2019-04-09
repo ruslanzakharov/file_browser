@@ -67,7 +67,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "File Browser"))
-        self.btn_left.setText(_translate("MainWindow", "🢀"))
-        self.btn_search.setText(_translate("MainWindow", "🔍"))
-        self.btn_right.setText(_translate("MainWindow", "🢂"))
-
+        self.btn_left.setIcon(QtGui.QIcon('files/back.png'))
+        self.btn_search.setIcon(QtGui.QIcon('files/search.png'))
+        self.btn_right.setIcon(QtGui.QIcon('files/next.png'))
